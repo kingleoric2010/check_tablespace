@@ -1,0 +1,18 @@
+# CIPHRON check_tablespace
+# Configuration File
+
+# Path to oracle home
+export ORACLE_HOME=/u01/app/oracle/product/11.2.0/dbhome_1
+
+# Oracle TNS Name
+TNS=sometnsname
+
+# Oracle Service Name
+SERVICE_NAME=someservicename
+
+# Path to sqlplus
+SQLPLUS=/usr/bin/sqlplus
+
+# Database credentials
+DB_USER=someuser
+DB_PASS=somepassword

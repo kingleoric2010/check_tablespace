@@ -1,0 +1,43 @@
+# CIPHRON Check Tablespace
+
+Nagios/Icinga plugin for checking a local Oracle database's tablespaces.
+The plugin is implemented in python and bash. The bash script is a small helper
+which utilizes sqlplus to query the tablespace usage. 
+
+## Installation
+
+Before using the plugin you need to edit the "config" file.
+
+## Usage
+
+usage: check_tablespace.py [-h] [--warn WARN] [--crit CRIT] tablespace_pattern
+
+Check Oracle tablespace usage.
+
+positional arguments:
+  tablespace_pattern
+
+optional arguments:
+  -h, --help          show this help message and exit
+  --warn WARN
+  --crit CRIT
+
+## Contributing
+
+1. Fork it!
+2. Create your feature branch: `git checkout -b my-new-feature`
+3. Commit your changes: `git commit -am 'Add some feature'`
+4. Push to the branch: `git push origin my-new-feature`
+5. Submit a pull request :D
+
+## History
+
+2015-04-26: First release.
+
+## Credits
+
+TODO: Write credits
+
+## License
+
+TODO: Write license
