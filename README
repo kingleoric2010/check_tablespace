@@ -1,4 +1,4 @@
-# CIPHRON Check Tablespace
+# Check Tablespace
 
 Nagios/Icinga plugin for checking a local Oracle database's tablespaces.
 The plugin is implemented in python and bash. The bash script is a small helper
