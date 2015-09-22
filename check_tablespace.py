@@ -11,12 +11,13 @@ CRITICAL = 2
 UNKNOWN = 3
 
 # global declaration of default warn and crit values in GB 
-DEFAULT_WARN = 2
-DEFAULT_CRIT = 1
+DEFAULT_WARN = 3
+DEFAULT_CRIT = 2
 
 def init_parser():
     '''Initialization of the argparse module.'''
-    parser = argparse.ArgumentParser(description="Check Oracle tablespace usage.")
+    parser = argparse.ArgumentParser(\
+            description="Check Oracle tablespace usage.")
     parser.add_argument('tablespace_pattern', type=str)
     parser.add_argument('--warn', type=float, default=DEFAULT_WARN)
     parser.add_argument('--crit', type=float, default=DEFAULT_CRIT)
@@ -27,9 +28,13 @@ def execute_helper_script():
     helper_script = path.join(path.dirname(path.realpath(__file__)),
 		    "get_tablespace_info.sh")
 
-    p = subprocess.Popen([helper_script], stdout=subprocess.PIPE)
-    out, err = p.communicate()
-    return out.split("\n")
+    try:
+        p = subprocess.Popen([helper_script], stdout=subprocess.PIPE)
+        out, err = p.communicate()
+        return out
+    except:
+        print "Error executing helper script."
+        sys.exit(UNKNOWN)
 
 def parse_output(output, pattern):
     '''Parses the returned output and returns a list of matching
@@ -37,9 +42,14 @@ tablespace and their left space value.'''
     tablespace_info = []
     for line in output:
         if pattern in line:
-            tablespace_name = line.split(" ")[0].strip("\t")
-            free_size = float(line.split(" ").pop())
-            tablespace_info.append((tablespace_name, free_size))
+            try:
+                tablespace_name = line.split("\t")[0].strip(" ")
+                free_size = float(line.split("\t").pop().strip(" "))
+                tablespace_info.append((tablespace_name, free_size))
+            except:
+                print "Error parsing tablespace info for {0}"\
+                        .format(tablespace_name)
+                sys.exit(UNKNOWN)
     if len(tablespace_info) == 0:
         print "No match found."
         sys.exit(UNKNOWN)
@@ -50,7 +60,9 @@ def check_size(tablespace_info, warn, crit):
 and returns a list of results.'''
     results = []
     for tablespace in tablespace_info:
-        if tablespace[1] <= crit:
+        if type(tablespace[1]) != float:
+            results.append((tablespace, "UNKNOWN"))
+        elif tablespace[1] <= crit:
             results.append((tablespace, "CRITICAL"))
         elif tablespace[1] <= warn:
             results.append((tablespace, "WARNING"))
@@ -59,19 +71,28 @@ and returns a list of results.'''
     return results
 
 def print_output(results):
-    for result in results:
-        print "{0}: Tablespace {1} has {2} GB free space left."\
-.format(result[1], result[0][0], result[0][1])
+    try:
+        for result in results:
+            print "{0}: Tablespace {1} has {2} GB free space left."\
+                    .format(result[1], result[0][0], result[0][1]) 
+    except:
+            sys.exit(UNKNOWN)
 
 def send_return_code(results):
     '''Check results for right return value and return.''' 
     critical, warning, ok = False, False, False
+    if type(results) != list:
+        sys.exit(UNKNOWN)
     for result in results:
-        if "CRITICAL" == result[1]:
+        if not result[1] or "UNKNOWN" == result[1]:
+            unknown = True
+        elif "CRITICAL" == result[1]:
             critical = True 
         elif "WARNING" == result[1]:
             warning = True
-    if critical:
+    if unknown:
+        sys.exit(UNKNOWN)
+    elif critical:
         sys.exit(CRITICAL)
     elif warning:
         sys.exit(WARNING)
