@@ -31,7 +31,7 @@ def execute_helper_script():
     try:
         p = subprocess.Popen([helper_script], stdout=subprocess.PIPE)
         out, err = p.communicate()
-        return out
+        return out.split("\n")
     except:
         print "Error executing helper script."
         sys.exit(UNKNOWN)
